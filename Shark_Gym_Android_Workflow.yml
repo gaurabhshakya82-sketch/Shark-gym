@@ -1,0 +1,35 @@
+name: Build Shark Gym APK
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'Shark_Gym_V2_Logo_Integrated.zip'
+      - '.github/workflows/android.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Create Android project scaffold
+        run: flutter create --platforms=android --project-name gym_shark buildsrc
+      - name: Overlay Shark Gym source
+        run: |
+          unzip -o Shark_Gym_V2_Logo_Integrated.zip -d buildsrc
+          cd buildsrc
+          flutter pub get
+      - name: Build release APK
+        run: cd buildsrc && flutter build apk --release
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Shark-Gym-APK
+          path: buildsrc/build/app/outputs/flutter-apk/app-release.apk
